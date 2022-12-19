@@ -8,37 +8,39 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/puskipus/e-commerce/app/database/seeders"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type Server struct {
-	DB *gorm.DB
+	DB     *gorm.DB
 	Router *mux.Router
 }
 
 type AppConfig struct {
 	AppName string
-	AppEnv 	string
+	AppEnv  string
 	AppPort string
 }
 
 type DBConfig struct {
-	DBHost 		string
-	DBUser 		string
-	DBPassword 	string
-	DBName 		string
-	DBPort 		string
+	DBHost     string
+	DBUser     string
+	DBPassword string
+	DBName     string
+	DBPort     string
 }
 
-func (server *Server) Initialize(appconfig AppConfig, dbConfig DBConfig)  {
+func (server *Server) Initialize(appconfig AppConfig, dbConfig DBConfig) {
 	fmt.Println("Welcome to " + appconfig.AppName)
 
 	server.InitializeDB(dbConfig)
 	server.InitializeRoutes()
+	seeders.DBSeed(server.DB)
 }
 
-func (server *Server) InitializeDB(dbConfig DBConfig)  {
+func (server *Server) InitializeDB(dbConfig DBConfig) {
 	var err error
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta", dbConfig.DBHost, dbConfig.DBUser, dbConfig.DBPassword, dbConfig.DBName, dbConfig.DBPort)
 	server.DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -58,7 +60,7 @@ func (server *Server) InitializeDB(dbConfig DBConfig)  {
 	fmt.Println("Migration success")
 }
 
-func (server *Server) Run(addr string)  {
+func (server *Server) Run(addr string) {
 	fmt.Printf("Listening to port %s", addr)
 	log.Fatal(http.ListenAndServe(addr, server.Router))
 }
@@ -71,7 +73,7 @@ func Getenv(key, fallback string) string {
 	return fallback
 }
 
-func Run()  {
+func Run() {
 	var server = Server{}
 	var appconfig = AppConfig{}
 	var dBConfig = DBConfig{}
